@@ -10,10 +10,7 @@ userRoutes.route('/lookup').get(function(req, res) {
 	console.log("request " + JSON.stringify(username));
 	if (typeof username !== 'undefined' && username != "") {
 		query = { $where: `this.username == '${username}'` }
-		//Simple injection: pass in "' || '2'=='2" (without double quotes)
-		// This will return all records
-		//
-		// JS injection is also possible here, because the where clause evaluates a JS expression
+		
 		console.log("Mongo query: " + JSON.stringify(query));
 		User.find(query, function (err, users) {
 			if (err) {
@@ -30,15 +27,7 @@ userRoutes.route('/lookup').get(function(req, res) {
 	}	
 });
 
-/** Allow a similar query using POST and JSON
-  * Similar to above, inject data like
-  * {"username":"' || '2'=='2"}
 
-  Sample default CURL request::
-	curl -X POST http://localhost:4000/user/lookup -H 'Content-Type: application/json' -d '{"username": "guest"}'
-  And Injection (need to escape our injected single quotes for CURL only):
-	curl -X POST http://localhost:4000/user/lookup -H 'Content-Type: application/json' -d '{"username": "guest'\'' || '\''2'\''=='\''2"}'
-  */
 userRoutes.route('/lookup').post(function(req, res) {
 	let username = req.body.username;
 	console.log("request " + JSON.stringify(username));
@@ -113,17 +102,7 @@ userRoutes.route('/login').get(function(req, res) {
 	res.render('userlogin', { title: 'User Login', role: "None"});
 });
 
-/*
-* This is injectable since we are passing json.
-* The following payload will log you in as the specified user
-* {"username":"admin","password":{"$ne": 1}}
-*
-* You can iterate through users using something like:
-* {"username":{"$gt": "h"},"password":{"$ne": 1}}
-* 
-* Submitting this probably requires a proxy (or browser interception), since by default
-* the form password value will become a string, but an object needs to be passed.
-*/
+
 userRoutes.route('/login').post(function(req, res) {
 	let uname = req.body.username;
 	let pass = req.body.password;
